@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "609107762959",
+    "project_id": "plis-b0c7c",
+    "storage_bucket": "plis-b0c7c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:609107762959:android:aff3096fbf1a001aa3a87a",
+        "android_client_info": {
+          "package_name": "com.example.plis_administrador"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBK3Xnt43_qtM8fgpdsRfDYcaGxhlR70TA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:609107762959:android:d077e094b2cc53f2a3a87a",
+        "android_client_info": {
+          "package_name": "com.example.plis_conductor_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBK3Xnt43_qtM8fgpdsRfDYcaGxhlR70TA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
