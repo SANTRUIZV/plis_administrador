@@ -17,7 +17,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   bool _loading = false;
   bool _obscurePassword = true;
   String? _error;
-  
+
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -29,23 +29,19 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-    
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
-    
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
+
     _animationController.forward();
   }
 
@@ -60,7 +56,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   // Función helper para parsear datos de Firestore de manera segura
   Map<String, dynamic>? _parseFirestoreData(Object? data) {
     if (data == null) return null;
-    
+
     try {
       if (data is Map<String, dynamic>) {
         return data;
@@ -70,28 +66,28 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     } catch (e) {
       print('Error parseando datos de Firestore: $e');
     }
-    
+
     return null;
   }
 
   Future<void> _login() async {
     if (!mounted) return;
-    
+
     setState(() {
       _loading = true;
       _error = null;
     });
-    
+
     try {
       // Autenticar con Firebase Auth
-      final UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-      );
-      
+      final UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+          );
+
       // Verificar el rol del usuario en Firestore
       await _checkUserRole(userCredential.user!.uid);
-      
     } on FirebaseAuthException catch (e) {
       if (mounted) {
         setState(() {
@@ -119,36 +115,42 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           .collection('admins')
           .doc(userId)
           .get();
-      
+
       if (!adminDoc.exists) {
         await FirebaseAuth.instance.signOut();
         throw 'Usuario no encontrado en el sistema administrativo.';
       }
-      
+
       // Parse más seguro para evitar errores
-      final Map<String, dynamic>? adminData = _parseFirestoreData(adminDoc.data());
-      
+      final Map<String, dynamic>? adminData = _parseFirestoreData(
+        adminDoc.data(),
+      );
+
       if (adminData == null) {
         await FirebaseAuth.instance.signOut();
         throw 'Error al obtener datos del usuario.';
       }
-      
+
       final String userRole = adminData['role']?.toString() ?? '';
       final String estado = adminData['estado']?.toString() ?? '';
-      
-      if (userRole != 'superadmin' || estado != 'activo') {
+
+      if (![
+            'superadmin',
+            'admin',
+            'moderador',
+            'finanzas',
+            'soporte',
+          ].contains(userRole) ||
+          estado != 'activo') {
         await FirebaseAuth.instance.signOut();
-        throw 'Acceso denegado. Solo superadministradores activos pueden acceder.';
+        throw 'Acceso denegado. Solo administradores activos pueden acceder.';
       }
-      
+
       // Actualizar último acceso
-      await FirebaseFirestore.instance
-          .collection('admins')
-          .doc(userId)
-          .update({
+      await FirebaseFirestore.instance.collection('admins').doc(userId).update({
         'ultimoAcceso': FieldValue.serverTimestamp(),
       });
-      
+
       // Navegar al home si todo está correcto
       if (mounted) {
         Navigator.pushReplacement(
@@ -156,7 +158,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           MaterialPageRoute(builder: (context) => const HomeScreen()),
         );
       }
-      
     } catch (e) {
       await FirebaseAuth.instance.signOut();
       if (mounted) {
@@ -222,10 +223,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.white,
-                              Colors.grey.shade50,
-                            ],
+                            colors: [Colors.white, Colors.grey.shade50],
                           ),
                         ),
                         child: Form(
@@ -260,7 +258,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                 ),
                               ),
                               const SizedBox(height: 24),
-                              
+
                               // Título
                               Text(
                                 'Plis Administradores',
@@ -279,7 +277,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                 ),
                               ),
                               const SizedBox(height: 32),
-                              
+
                               // Campo de email
                               TextFormField(
                                 controller: _emailController,
@@ -315,14 +313,16 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                   if (value == null || value.isEmpty) {
                                     return 'Ingrese su correo electrónico';
                                   }
-                                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                                  if (!RegExp(
+                                    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                  ).hasMatch(value)) {
                                     return 'Ingrese un correo válido';
                                   }
                                   return null;
                                 },
                               ),
                               const SizedBox(height: 20),
-                              
+
                               // Campo de contraseña
                               TextFormField(
                                 controller: _passwordController,
@@ -335,9 +335,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                   ),
                                   suffixIcon: IconButton(
                                     icon: Icon(
-                                      _obscurePassword 
-                                        ? Icons.visibility_off_outlined
-                                        : Icons.visibility_outlined,
+                                      _obscurePassword
+                                          ? Icons.visibility_off_outlined
+                                          : Icons.visibility_outlined,
                                       color: Colors.grey.shade600,
                                     ),
                                     onPressed: () {
@@ -378,7 +378,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                 },
                               ),
                               const SizedBox(height: 24),
-                              
+
                               // Mensaje de error
                               if (_error != null)
                                 Container(
@@ -387,7 +387,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
                                     color: Colors.red.shade50,
-                                    border: Border.all(color: Colors.red.shade200),
+                                    border: Border.all(
+                                      color: Colors.red.shade200,
+                                    ),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Row(
@@ -410,7 +412,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                     ],
                                   ),
                                 ),
-                              
+
                               // Botón de login
                               SizedBox(
                                 width: double.infinity,
@@ -419,13 +421,16 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                   onPressed: _loading
                                       ? null
                                       : () {
-                                          if (_formKey.currentState!.validate()) {
+                                          if (_formKey.currentState!
+                                              .validate()) {
                                             _login();
                                           }
                                         },
                                   style: ElevatedButton.styleFrom(
                                     elevation: 8,
-                                    shadowColor: Colors.deepPurple.withOpacity(0.3),
+                                    shadowColor: Colors.deepPurple.withOpacity(
+                                      0.3,
+                                    ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(16),
                                     ),
@@ -466,7 +471,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                 ),
                               ),
                               const SizedBox(height: 24),
-                              
+
                               // Link de ayuda
                               TextButton(
                                 onPressed: () {
@@ -481,16 +486,18 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                   ),
                                 ),
                               ),
-                              
+
                               const SizedBox(height: 12),
-                              
+
                               // Información de soporte
                               Container(
                                 width: double.infinity,
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
                                   color: Colors.blue.shade50,
-                                  border: Border.all(color: Colors.blue.shade200),
+                                  border: Border.all(
+                                    color: Colors.blue.shade200,
+                                  ),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Row(

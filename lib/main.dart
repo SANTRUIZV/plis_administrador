@@ -78,7 +78,10 @@ class PlisAdminApp extends StatelessWidget {
                     const SizedBox(height: 16),
                     const Text(
                       'Error al inicializar Firebase',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(

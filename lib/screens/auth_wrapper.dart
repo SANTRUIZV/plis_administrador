@@ -12,20 +12,15 @@ class AuthWrapper extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        // Mientras se verifica el estado de autenticación
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
+          return Scaffold(body: Center(child: CircularProgressIndicator()));
         }
-        
+
         // Si no hay usuario autenticado
         if (snapshot.data == null) {
           return const LoginPage();
         }
-        
+
         // Si hay usuario autenticado, verificar su rol
         return FutureBuilder<bool>(
           future: _checkUserRole(snapshot.data!.uid),
@@ -33,13 +28,13 @@ class AuthWrapper extends StatelessWidget {
             if (roleSnapshot.connectionState == ConnectionState.waiting) {
               return _buildLoadingScreen();
             }
-            
+
             if (roleSnapshot.hasError || roleSnapshot.data != true) {
               // Si hay error o no es superadmin, cerrar sesión y mostrar login
               FirebaseAuth.instance.signOut();
               return _buildAccessDeniedScreen();
             }
-            
+
             // Si es superadmin, mostrar home
             return const HomeScreen();
           },
@@ -51,7 +46,7 @@ class AuthWrapper extends StatelessWidget {
   // Función helper para parsear datos de Firestore de manera segura
   Map<String, dynamic>? _parseFirestoreData(Object? data) {
     if (data == null) return null;
-    
+
     try {
       if (data is Map<String, dynamic>) {
         return data;
@@ -61,7 +56,7 @@ class AuthWrapper extends StatelessWidget {
     } catch (e) {
       print('Error parseando datos de Firestore: $e');
     }
-    
+
     return null;
   }
 
@@ -72,24 +67,32 @@ class AuthWrapper extends StatelessWidget {
           .collection('admins')
           .doc(userId)
           .get();
-      
+
       if (!adminDoc.exists) {
         return false;
       }
-      
+
       // Parse más seguro para evitar errores
-      final Map<String, dynamic>? adminData = _parseFirestoreData(adminDoc.data());
-      
+      final Map<String, dynamic>? adminData = _parseFirestoreData(
+        adminDoc.data(),
+      );
+
       if (adminData == null) {
         return false;
       }
-      
+
       final String userRole = adminData['role']?.toString() ?? '';
       final String estado = adminData['estado']?.toString() ?? '';
-      
-      // Verificar que sea superadmin y esté activo
-      return userRole == 'superadmin' && estado == 'activo';
-      
+
+      // Permitir cualquier rol activo
+      return estado == 'activo' &&
+          [
+            'superadmin',
+            'admin',
+            'moderador',
+            'finanzas',
+            'soporte',
+          ].contains(userRole);
     } catch (e) {
       print('Error verificando rol: $e');
       return false;
@@ -114,10 +117,7 @@ class AuthWrapper extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 3,
-              ),
+              CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
               SizedBox(height: 24),
               Text(
                 'Verificando permisos...',
