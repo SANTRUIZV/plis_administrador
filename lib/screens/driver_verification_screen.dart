@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DriverVerificationScreen extends StatefulWidget {
   const DriverVerificationScreen({super.key});
 
   @override
-  State<DriverVerificationScreen> createState() => _DriverVerificationScreenState();
+  State<DriverVerificationScreen> createState() =>
+      _DriverVerificationScreenState();
 }
 
 class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
@@ -54,16 +57,14 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
               ],
             ),
           ),
-          
+
           // Lista de conductores desde Firebase
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: _getDriversStream(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
+                  return const Center(child: CircularProgressIndicator());
                 }
 
                 if (snapshot.hasError) {
@@ -133,9 +134,7 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
           .snapshots();
     } catch (e) {
       // Si hay error con orderBy, intentar sin ordenar
-      return FirebaseFirestore.instance
-          .collection('drivers')
-          .snapshots();
+      return FirebaseFirestore.instance.collection('drivers').snapshots();
     }
   }
 
@@ -171,10 +170,7 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
         decoration: BoxDecoration(
           color: isSelected ? Colors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.white,
-            width: 1,
-          ),
+          border: Border.all(color: Colors.white, width: 1),
         ),
         child: Text(
           label,
@@ -212,11 +208,7 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            size: 80,
-            color: Colors.grey.shade400,
-          ),
+          Icon(icon, size: 80, color: Colors.grey.shade400),
           const SizedBox(height: 16),
           Text(
             message,
@@ -234,7 +226,7 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
 
   Widget _buildDriverCard(String driverId, Map<String, dynamic> driver) {
     final fechaRegistro = _formatDate(driver['fechaRegistro']);
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -299,7 +291,11 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
                 const SizedBox(width: 8),
                 Text(driver['telefono']?.toString() ?? 'Sin teléfono'),
                 const Spacer(),
-                Icon(Icons.calendar_today, size: 16, color: Colors.grey.shade600),
+                Icon(
+                  Icons.calendar_today,
+                  size: 16,
+                  color: Colors.grey.shade600,
+                ),
                 const SizedBox(width: 8),
                 Text(fechaRegistro),
               ],
@@ -331,14 +327,14 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
                     ),
                   ),
                 ),
-                if (driver['estado'] == 'pendiente_verificacion' || 
+                if (driver['estado'] == 'pendiente_verificacion' ||
                     driver['estado'] == 'pendiente') ...[
                   const SizedBox(width: 8),
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: _loading 
-                        ? null 
-                        : () => _verifyDriver(driverId, driver),
+                      onPressed: _loading
+                          ? null
+                          : () => _verifyDriver(driverId, driver),
                       icon: const Icon(Icons.check, size: 16),
                       label: const Text('Aprobar'),
                       style: ElevatedButton.styleFrom(
@@ -353,9 +349,9 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: _loading 
-                        ? null 
-                        : () => _rejectDriver(driverId, driver),
+                      onPressed: _loading
+                          ? null
+                          : () => _rejectDriver(driverId, driver),
                       icon: const Icon(Icons.close, size: 16),
                       label: const Text('Rechazar'),
                       style: ElevatedButton.styleFrom(
@@ -378,7 +374,7 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
 
   String _formatDate(dynamic timestamp) {
     if (timestamp == null) return 'Fecha no disponible';
-    
+
     try {
       DateTime date;
       if (timestamp is Timestamp) {
@@ -391,7 +387,7 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
       } else {
         return timestamp.toString();
       }
-      
+
       return '${date.day}/${date.month}/${date.year}';
     } catch (e) {
       return 'Fecha inválida';
@@ -410,7 +406,8 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
       color = Colors.green;
       label = 'Verificado';
       icon = Icons.verified;
-    } else if (estadoStr == 'pendiente_verificacion' || estadoStr == 'pendiente') {
+    } else if (estadoStr == 'pendiente_verificacion' ||
+        estadoStr == 'pendiente') {
       color = Colors.orange;
       label = 'Pendiente';
       icon = Icons.pending;
@@ -480,10 +477,7 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
                 const SizedBox(height: 20),
                 const Text(
                   'Detalles del Conductor',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 20),
                 Expanded(
@@ -492,7 +486,8 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
                     children: [
                       _buildDetailItem(
                         icon: Icons.person,
-                        title: '${driver['nombre'] ?? ''} ${driver['apellido'] ?? ''}',
+                        title:
+                            '${driver['nombre'] ?? ''} ${driver['apellido'] ?? ''}',
                         subtitle: 'Nombre completo',
                       ),
                       _buildDetailItem(
@@ -502,12 +497,14 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
                       ),
                       _buildDetailItem(
                         icon: Icons.phone,
-                        title: driver['telefono']?.toString() ?? 'No disponible',
+                        title:
+                            driver['telefono']?.toString() ?? 'No disponible',
                         subtitle: 'Teléfono',
                       ),
                       _buildDetailItem(
                         icon: Icons.badge,
-                        title: driver['documento']?.toString() ?? 'No disponible',
+                        title:
+                            driver['documento']?.toString() ?? 'No disponible',
                         subtitle: 'Número de documento',
                       ),
                       _buildDetailItem(
@@ -540,10 +537,7 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
     if (documentos == null) {
       return const Text(
         'No hay documentos disponibles',
-        style: TextStyle(
-          color: Colors.grey,
-          fontStyle: FontStyle.italic,
-        ),
+        style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
       );
     }
 
@@ -552,10 +546,7 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
       if (docs.isEmpty) {
         return const Text(
           'No hay documentos cargados',
-          style: TextStyle(
-            color: Colors.grey,
-            fontStyle: FontStyle.italic,
-          ),
+          style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
         );
       }
 
@@ -563,23 +554,36 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (docs['cedula'] != null)
-            _buildDocumentItem('Cédula de Identidad', Icons.badge, docs['cedula']),
+            _buildDocumentItem(
+              'Cédula de Identidad',
+              Icons.badge,
+              docs['cedula'],
+            ),
           if (docs['licencia'] != null)
-            _buildDocumentItem('Licencia de Conducir', Icons.drive_eta, docs['licencia']),
+            _buildDocumentItem(
+              'Licencia de Conducir',
+              Icons.drive_eta,
+              docs['licencia'],
+            ),
           if (docs['tarjeta'] != null)
-            _buildDocumentItem('Tarjeta de Propiedad', Icons.description, docs['tarjeta']),
+            _buildDocumentItem(
+              'Tarjeta de Propiedad',
+              Icons.description,
+              docs['tarjeta'],
+            ),
           if (docs['foto'] != null)
-            _buildDocumentItem('Foto del Vehículo', Icons.directions_car, docs['foto']),
+            _buildDocumentItem(
+              'Foto del Vehículo',
+              Icons.directions_car,
+              docs['foto'],
+            ),
         ],
       );
     }
 
     return const Text(
       'Formato de documentos no reconocido',
-      style: TextStyle(
-        color: Colors.grey,
-        fontStyle: FontStyle.italic,
-      ),
+      style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
     );
   }
 
@@ -605,57 +609,144 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
               onPressed: () => _showDocumentDialog(title, url.toString()),
               child: const Text('Ver'),
             )
-          : const Text(
-              'No disponible',
-              style: TextStyle(color: Colors.grey),
-            ),
+          : const Text('No disponible', style: TextStyle(color: Colors.grey)),
       contentPadding: EdgeInsets.zero,
     );
   }
 
+  bool _isPDF(String url) {
+    final lowercaseUrl = url.toLowerCase();
+    return lowercaseUrl.contains('.pdf') ||
+        lowercaseUrl.contains('pdf') ||
+        lowercaseUrl.contains('%2Fpdf%2F');
+  }
+
+  Future<void> _openExternalUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
   void _showDocumentDialog(String title, String url) {
+    final isPDF = _isPDF(url);
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('URL del documento:'),
-            const SizedBox(height: 8),
-            SelectableText(
-              url,
-              style: const TextStyle(fontSize: 12),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Nota: Copia la URL para abrirla en tu navegador',
-              style: TextStyle(
-                fontSize: 12,
-                fontStyle: FontStyle.italic,
-                color: Colors.grey,
+      builder: (context) => Dialog(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppBar(
+                title: Text(title),
+                backgroundColor: Colors.deepPurple.shade600,
+                foregroundColor: Colors.white,
+                automaticallyImplyLeading: false,
+                actions: [
+                  if (isPDF)
+                    IconButton(
+                      icon: const Icon(Icons.open_in_browser),
+                      tooltip: 'Abrir en navegador',
+                      onPressed: () => _openExternalUrl(url),
+                    ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cerrar'),
+              Expanded(
+                child: isPDF ? _buildPDFViewer(url) : _buildImageViewer(url),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Future<void> _verifyDriver(String driverId, Map<String, dynamic> driver) async {
+  Widget _buildPDFViewer(String url) {
+    return SfPdfViewer.network(
+      url,
+      onDocumentLoadFailed: (PdfDocumentLoadFailedDetails details) {
+        return;
+      },
+    );
+  }
+
+  Widget _buildImageViewer(String url) {
+    return InteractiveViewer(
+      minScale: 0.5,
+      maxScale: 4.0,
+      child: Center(
+        child: Image.network(
+          url,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                          loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) {
+            return Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Colors.red.shade400,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Error al cargar el documento',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Verifica que el archivo sea una imagen válida',
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () => _openExternalUrl(url),
+                    icon: const Icon(Icons.open_in_browser),
+                    label: const Text('Abrir en navegador'),
+                  ),
+                  const SizedBox(height: 16),
+                  SelectableText(
+                    url,
+                    style: const TextStyle(fontSize: 10),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _verifyDriver(
+    String driverId,
+    Map<String, dynamic> driver,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Aprobar Conductor'),
         content: Text(
-          '¿Estás seguro de que quieres aprobar a ${driver['nombre']} ${driver['apellido']}?'
+          '¿Estás seguro de que quieres aprobar a ${driver['nombre']} ${driver['apellido']}?',
         ),
         actions: [
           TextButton(
@@ -678,10 +769,10 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
             .collection('drivers')
             .doc(driverId)
             .update({
-          'estado': 'activo',
-          'verificado': true,
-          'fechaVerificacion': FieldValue.serverTimestamp(),
-        });
+              'estado': 'activo',
+              'verificado': true,
+              'fechaVerificacion': FieldValue.serverTimestamp(),
+            });
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -708,9 +799,12 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
     }
   }
 
-  Future<void> _rejectDriver(String driverId, Map<String, dynamic> driver) async {
+  Future<void> _rejectDriver(
+    String driverId,
+    Map<String, dynamic> driver,
+  ) async {
     final TextEditingController reasonController = TextEditingController();
-    
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -718,7 +812,9 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('¿Estás seguro de que quieres rechazar a ${driver['nombre']} ${driver['apellido']}?'),
+            Text(
+              '¿Estás seguro de que quieres rechazar a ${driver['nombre']} ${driver['apellido']}?',
+            ),
             const SizedBox(height: 16),
             TextField(
               controller: reasonController,
@@ -752,11 +848,11 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
             .collection('drivers')
             .doc(driverId)
             .update({
-          'estado': 'rechazado',
-          'verificado': false,
-          'motivoRechazo': reasonController.text.trim(),
-          'fechaRechazo': FieldValue.serverTimestamp(),
-        });
+              'estado': 'rechazado',
+              'verificado': false,
+              'motivoRechazo': reasonController.text.trim(),
+              'fechaRechazo': FieldValue.serverTimestamp(),
+            });
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
